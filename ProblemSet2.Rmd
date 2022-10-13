@@ -1,0 +1,155 @@
+---
+title: "Problemset2"
+output:
+  word_document: default
+  pdf_document: default
+date: "2022-09-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+Problem1_a
+```{r, message=FALSE}
+library(tidyverse)
+vehicles <- read.csv('C:/Users/86150/Desktop/yyy/vehicles.csv')
+vehicles$phevBlended <- as.logical(vehicles$phevBlended)
+m <- subset(vehicles,phevBlended == FALSE)
+fuelcar <- subset(m, highwayE == 0)
+
+``` 
+Problem1_b
+
+```{r}
+fuelcar_1<-subset(fuelcar, make== c("Honda","smart", "Ford", "Nissan","Ferrari"))
+
+ggplot(data=fuelcar_1,aes(year,comb08,color=make,group = make))+stat_smooth(method = lm)+geom_point(pch=20)+theme(plot.title = element_text(hjust = 0.5))+labs(title=" Fuel Economy Progress",y="mpg ",x="year") 
+```
+
+
+
+
+
+## problem2
+```{r}
+Sys.setlocale('LC_TIME', 'English') # seting english date
+library(tidyquant)
+library(ggplot2)
+IXIC21.22 <- read.csv('C:/Users/86150/Desktop/yyy/IXIC21-22.csv')
+x <- as.Date(IXIC21.22$Date)
+y <- IXIC21.22$Adj.Close
+    ggplot(data=IXIC21.22,aes(x,y)) +
+    geom_candlestick(aes(open = Open, high = High, low = Low, close = Close)) +
+    labs(title = "NASDAQ", y = "Adj.Close", x = "Date") +
+    theme_tq()
+   
+```
+
+```{r}
+library(tidyverse)
+library(tidyquant)
+ruralCapacityData <- read.csv("C:/Users/86150/Desktop/yyy/ruralCapacityData.csv")
+
+
+```
+
+Problem3_a
+```{r}
+x <- ruralCapacityData$per_over_25_with_bach
+y <- ruralCapacityData$cap_index
+ggplot(data=ruralCapacityData, aes(x, y)) +
+    geom_point(color = "red")+
+   geom_smooth()+
+  labs(
+    x = "per_over_25_with_bach",
+    y = "RCI",
+    title = "RCI vs Education Level",
+    subtitle = "  Percent of population 25 and over with a bachelors degree",
+      )
+x <- ruralCapacityData$per_fam_below_pov
+y <- ruralCapacityData$cap_index
+ggplot(data=ruralCapacityData, aes(x, y)) +
+    geom_point(color = "green")+
+   geom_smooth()+
+labs(
+    x = "Families below the poverty level %",
+    y = "RCI",
+    title = "RCI vs Poverty Level",
+    subtitle = " Percentage of families below the poverty level",
+      )
+x <- ruralCapacityData$per_insured
+y <- ruralCapacityData$cap_index
+ggplot(data=ruralCapacityData, aes(x, y)) +
+    geom_point(color = "blue")+
+   geom_smooth()+
+labs(
+    x = "Population with health insurance %",
+    y = "RCI",
+    title = "RCI vs Health Insurance",
+    subtitle = " Percentage of population with health insurance",
+      )
+
+x <- ruralCapacityData$house_broadband
+y <- ruralCapacityData$cap_index
+ggplot(data=ruralCapacityData, aes(x, y)) +
+    geom_point(color = "yellow")+
+   geom_smooth()+
+labs(
+    x = "House_broadband",
+    y = "RCI",
+    title = "RCI vs Broadband Connection",
+    subtitle = " Total households with broadband connection",
+      )
+
+
+
+```
+
+## Problem3_b
+```{r}
+ggplot(data = ruralCapacityData, aes(x = per_over_25_with_bach,
+                                     y = house_broadband,
+                                     color = cap_index)) +
+  geom_point()+
+  labs(
+    title = " Broadband Connection vs Education Level",
+    subtitle = " Relationship between the number of houses with broadband and
+the percent of adults, 25 and older, with bachelor degrees" )
+
+
+```
+
+## Problem3_c
+```{r}
+data_1 <- subset(ruralCapacityData, pop_total < 16000)
+data_2 <- subset(ruralCapacityData, pop_total > 16000 & pop_total < 55000)
+data_3 <- subset(ruralCapacityData, pop_total > 55000)
+ggplot(data = data_1, aes(x = pop_total,
+                                     y = cap_index)) +
+  geom_point()+
+  geom_smooth()+
+  labs(
+    title = "Different sizes of communities vs RCI",
+    subtitle = "Total population less than 16000" )
+
+ggplot(data = data_2, aes(x = pop_total,
+                                     y = cap_index)) +
+  geom_point()+
+  geom_smooth()+
+  labs(
+    title = "Different sizes of communities vs RCI",
+    subtitle = " Total population between 16000 and 55000" )
+
+ggplot(data = data_3, aes(x = pop_total,
+                                     y = cap_index)) +
+  geom_point()+
+  geom_smooth()+
+  labs(
+    title = "Different sizes of communities vs RCI",
+    subtitle = " Total population more than 55000" )
+
+
+```
