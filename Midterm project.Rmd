@@ -1,0 +1,105 @@
+---
+title: "Midterm project"
+output: pdf_document
+date: "2022-11-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(readxl)
+library(dplyr)
+library(gmodels)
+library(Rmisc)
+```
+
+```{r}
+strawb <- read_xlsx("C:/Users/86150/Desktop/615/midterm project/strawberries-2022oct30-a.xlsx",col_names = TRUE)
+head(strawb)
+```
+### Get the column names and index them
+```{r}
+cnames <- colnames(strawb)
+x <- 1:dim(strawb)[2]
+```
+
+
+```{r}
+ T <- NULL
+# ## Collect number of unique rows in each column
+for(i in x){T <- c(T, dim(unique(strawb[i]))[1])}
+
+drop_cols <- cnames[which(T == 1)]
+
+strawb %<>% select(!all_of(drop_cols))
+
+strawb %<>% arrange(Year, State)
+```
+
+
+
+```{r}
+##temp1 <- strawb %>% select(`Data Item`) %>% distinct()
+
+# strawb %<>% separate(col=`Data Item`,
+#                     into = c("Strawberries", "type", "items", "units"),
+#                     sep = ",",
+#                     fill = "right")
+
+```
+
+## Q2 
+```{r}
+Cal_organic_2016 <- strawb %>% filter(State=="CALIFORNIA",Year==2016,Domain=="ORGANIC STATUS")
+
+Value <- as.numeric(Cal_organic_2016$Value)
+ 
+231304956*1.96*0.137
+upper <- 231304956+62110007
+lower <- 231304956-62110007
+upper
+lower
+```
+## Q3 
+```{r}
+filter <- filter(strawb, State == 'CALIFORNIA' & Year == 2016 & Domain != 'ORGANIC STATUS')
+Cal_non_organic_2016 <- filter(filter, Value != "(NA)" & Value != "(D)" & Domain != "TOTAL")
+
+Value <- as.numeric(Cal_non_organic_2016$Value)
+
+CI(as.numeric(new_non$Value))
+```
+## Q4
+```{r}
+chemical <- filter(strawb, Domain != 'ORGANIC STATUS' & Domain != "TOTAL")
+grep("TOTAL",
+     chemical$`Domain Category`,
+     ignore.case = T)
+unique(strawb$`Domain Category`)
+unique(chemical$`Domain Category`)
+# Chemicals=175-36=139
+```
+
+
+## Q5
+```{r}
+chemical_florida <- filter(strawb, State == 'FLORIDA' & 
+                             Domain != 'ORGANIC STATUS' & 
+                             Domain != 'TOTAL' & 
+                             Domain != 'FERTILIZER')
+chemical_california <- filter(strawb, State == 'CALIFORNIA' & 
+                        Domain != 'ORGANIC STATUS' & 
+                        Domain != 'TOTAL' & 
+                        Domain != 'FERTILIZER')
+unique(chemical_fl$`Domain Category`)
+#so the difference is 138 - 115=23
+```
+
+```{r}
+
+```
+
