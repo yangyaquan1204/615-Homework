@@ -1,6 +1,8 @@
 ---
 title: "Midterm project"
-output: pdf_document
+output:
+  word_document: default
+  pdf_document: default
 date: "2022-11-06"
 ---
 
@@ -71,7 +73,7 @@ Cal_non_organic_2016 <- filter(filter, Value != "(NA)" & Value != "(D)" & Domain
 
 Value <- as.numeric(Cal_non_organic_2016$Value)
 
-CI(as.numeric(new_non$Value))
+CI(as.numeric(Value))
 ```
 ## Q4
 ```{r}
@@ -95,7 +97,7 @@ chemical_california <- filter(strawb, State == 'CALIFORNIA' &
                         Domain != 'ORGANIC STATUS' & 
                         Domain != 'TOTAL' & 
                         Domain != 'FERTILIZER')
-unique(chemical_fl$`Domain Category`)
+unique(chemical_florida$`Domain Category`)
 #so the difference is 138 - 115=23
 ```
 
