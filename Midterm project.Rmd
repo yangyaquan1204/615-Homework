@@ -4,6 +4,7 @@ output:
   word_document: default
   pdf_document: default
 date: "2022-11-06"
+author: "Yaquan Yang"
 ---
 
 ```{r setup, include=FALSE}
@@ -29,40 +30,47 @@ cnames <- colnames(strawb)
 x <- 1:dim(strawb)[2]
 ```
 
-
+## Drop null columns
 ```{r}
- T <- NULL
-# ## Collect number of unique rows in each column
+unique(strawb[1])
+unique(strawb[2])
+unique(strawb[3])
+
+T <- NULL
 for(i in x){T <- c(T, dim(unique(strawb[i]))[1])}
-
 drop_cols <- cnames[which(T == 1)]
-
-strawb %<>% select(!all_of(drop_cols))
-
+strawb %<>% dplyr::select(!all_of(drop_cols)) # use dplyr::select instead of build-in select!!!
 strawb %<>% arrange(Year, State)
 ```
 
 
-
+## Separate "Data Item" column
 ```{r}
-##temp1 <- strawb %>% select(`Data Item`) %>% distinct()
-
-# strawb %<>% separate(col=`Data Item`,
-#                     into = c("Strawberries", "type", "items", "units"),
-#                     sep = ",",
-#                     fill = "right")
+strawb %<>% separate(col=`Data Item`,
+                    into = c("Strawberries", "type", "items", "units"),
+                    sep = ",",
+                    fill = "right")
 
 ```
 
+```{r}
+org_rows <- filter(strawb,str_detect(`Domain Category`,"ORGANIC"))
+chem_rows <- filter(strawb,str_detect(`Domain Category`,"CHEMICAL"))
+```
+
+
 ## Q2 
 ```{r}
-Cal_organic_2016 <- strawb %>% filter(State=="CALIFORNIA",Year==2016,Domain=="ORGANIC STATUS")
+Cal_organic_2016 <- strawb %>% filter(State=="CALIFORNIA",Year==2016,str_detect(`type`,"(ORGANIC - SALES)"))
+# Cal_organic_2016 <- strawb %>% filter(State=="CALIFORNIA",Year==2016,Domain=="ORGANIC STATUS")
 
-Value <- as.numeric(Cal_organic_2016$Value)
- 
-231304956*1.96*0.137
-upper <- 231304956+62110007
-lower <- 231304956-62110007
+# We choose "ORGANIC - SALES, MEASURED IN $" for computing
+Sales_value <-231304956
+cv <- 0.137
+mean <- Sales_value
+sd <- cv*mean
+upper <- mean+1.96*sd
+lower <- mean-1.96*sd
 upper
 lower
 ```
@@ -73,35 +81,22 @@ Cal_non_organic_2016 <- filter(filter, Value != "(NA)" & Value != "(D)" & Domain
 
 Value <- as.numeric(Cal_non_organic_2016$Value)
 
-CI(as.numeric(Value))
+# Since we don't have the value of CV(%) for the "Cal_non_organic_2016" data, we can not compute the 95% CI of non-organic strawberry sales
 ```
 ## Q4
 ```{r}
-chemical <- filter(strawb, Domain != 'ORGANIC STATUS' & Domain != "TOTAL")
-grep("TOTAL",
-     chemical$`Domain Category`,
-     ignore.case = T)
-unique(strawb$`Domain Category`)
-unique(chemical$`Domain Category`)
-# Chemicals=175-36=139
+chemical <- filter(strawb,str_detect(`Domain Category`,"(CHEMICAL|FERTILIZER)"))
+
+n_distinct(chemical$`Domain Category`)
+# Chemicals=175
 ```
 
 
 ## Q5
 ```{r}
-chemical_florida <- filter(strawb, State == 'FLORIDA' & 
-                             Domain != 'ORGANIC STATUS' & 
-                             Domain != 'TOTAL' & 
-                             Domain != 'FERTILIZER')
-chemical_california <- filter(strawb, State == 'CALIFORNIA' & 
-                        Domain != 'ORGANIC STATUS' & 
-                        Domain != 'TOTAL' & 
-                        Domain != 'FERTILIZER')
-unique(chemical_florida$`Domain Category`)
+chemical_florida <- filter(strawb,str_detect(`Domain Category`,"(CHEMICAL|FERTILIZER)"), State=="FLORIDA")
+chemical_california <- filter(strawb,str_detect(`Domain Category`,"(CHEMICAL|FERTILIZER)"), State=="CALIFORNIA")
+n_distinct(chemical_california$`Domain Category`)-n_distinct(chemical_florida$`Domain Category`)
 #so the difference is 138 - 115=23
-```
-
-```{r}
-
 ```
 
