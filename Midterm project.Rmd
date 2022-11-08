@@ -21,7 +21,7 @@ library(Rmisc)
 ```
 
 ```{r}
-strawb <- read_xlsx("C:/Users/86150/Desktop/615/midterm project/strawberries-2022oct30-a.xlsx",col_names = TRUE)
+strawb <- read_xlsx("strawberries-2022oct30-a.xlsx",col_names = TRUE)
 head(strawb)
 ```
 ### Get the column names and index them
@@ -31,34 +31,96 @@ x <- 1:dim(strawb)[2]
 ```
 
 ## Drop null columns
-```{r}
-unique(strawb[1])
-unique(strawb[2])
-unique(strawb[3])
 
-T <- NULL
-for(i in x){T <- c(T, dim(unique(strawb[i]))[1])}
-drop_cols <- cnames[which(T == 1)]
-strawb %<>% dplyr::select(!all_of(drop_cols)) # use dplyr::select instead of build-in select!!!
-strawb %<>% arrange(Year, State)
+```{r message=F,warning=F}
+dim(strawb)
+drop_cols<-sapply(strawb,function(x) length(unique(x))==1)
+drop_cols<-names(drop_cols)[drop_cols]
+strawb %<>% dplyr::select(!all_of(drop_cols))
+dim(strawb)
 ```
 
 
-## Separate "Data Item" column
-```{r}
-strawb %<>% separate(col=`Data Item`,
-                    into = c("Strawberries", "type", "items", "units"),
-                    sep = ",",
-                    fill = "right")
+## Separate “Data Item” column
 
+```{r message=F,warning=F}
+strawb<- strawb %>% separate(col=`Data Item`,
+                    into = c("type", "measure"),
+                    sep = ", MEASURED IN ",
+                    fill = "warn")
+```					
+
+## about sales
+
+```{r message=F,warning=F}
+#table(strawb$type)
+
+plot1.data<-strawb %>% 
+           filter(type=='STRAWBERRIES, ORGANIC - SALES',
+				  measure=='$',
+                  Year==2016,
+                  str_detect(Value,'^\\d+$')) %>%
+		   mutate(Value=as.numeric(Value),
+		          Year=as.character(Year))
+				
+
+#plot1.data
+
+
+ggplot(plot1.data,aes(x=reorder(State,Value),y=Value))+
+    geom_bar(stat='identity',position='dodge2',fill='pink',colour='#34282C',width=0.65)+
+    theme_bw()+
+    scale_y_continuous(trans='log10')+
+    labs(x='',y='STRAWBERRIES, ORGANIC - SALES',
+    title='STRAWBERRIES, ORGANIC - SALES, 2016')
 ```
 
-```{r}
-org_rows <- filter(strawb,str_detect(`Domain Category`,"ORGANIC"))
-chem_rows <- filter(strawb,str_detect(`Domain Category`,"CHEMICAL"))
+## about price
+
+```{r message=F,warning=F,fig.width=9.3}
+
+#table(strawb$type)
+
+
+plot3.data<-strawb %>% 
+             filter(type=='STRAWBERRIES - PRICE RECEIVED') %>%
+			 mutate(Value=as.numeric(Value),
+			       Year=as.character(Year))
+			 
+			 
+			 
+ggplot(plot3.data,aes(y=State,x=Year,size=Value,fill=State))+
+   geom_point(shape=21)+
+   theme_bw()+
+   geom_text(aes(label=Value),size=4,nudge_y=0.2)+
+   scale_size_continuous(range=c(2,16))+
+   labs(size='PRICE RECEIVED',title='STRAWBERRIES - PRICE RECEIVED')
+```
+
+## about chemical 
+
+```{r message=F,warning=F,fig.width=9.3}
+plot2.data<-strawb %>% 
+            filter(
+			str_detect(`Domain Category`,'TOTAL'),
+			State=='CALIFORNIA',
+			str_detect(Value,'^\\d+$'),
+			) %>%
+			mutate(Value=as.numeric(Value),
+			       Year=as.character(Year),
+				   Domain=ordered(Domain,c('CHEMICAL, HERBICIDE','CHEMICAL, INSECTICIDE','CHEMICAL, FUNGICIDE','CHEMICAL, OTHER')))
+			
+			
+ggplot(plot2.data,aes(x=Year,y=Value,fill=Domain))+
+  geom_bar(stat='identity',position='dodge')+
+  theme_bw()+
+  scale_fill_hue()+
+  labs(title='CHEMICAL usage in California')
 ```
 
 
+
+## About Gradescope Questions
 ## Q2 
 ```{r}
 Cal_organic_2016 <- strawb %>% filter(State=="CALIFORNIA",Year==2016,str_detect(`type`,"(ORGANIC - SALES)"))
